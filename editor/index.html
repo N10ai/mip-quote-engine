@@ -1,1 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MIP Quote Engine - Editor Test</title>
+</head>
 
+<body>
+  <h1>MIP Quote Engine - Test</h1>
+
+  <button onclick="runTest()">Run Test Calculation</button>
+
+  <pre id="output"></pre>
+
+  <script type="module">
+    import { createEmptyQuote, generateQuoteNumber } from "../shared/schema.js";
+    import { calculateQuote } from "../shared/calculator.js";
+
+    window.runTest = function () {
+      let quote = createEmptyQuote();
+
+      quote.meta.quoteNumber = generateQuoteNumber();
+      quote.meta.createdAt = new Date().toISOString();
+      quote.meta.validUntil = "2026-05-25";
+
+      quote.customer.company = "Test Customer";
+
+      quote.shipment.mode = "air";
+      quote.shipment.direction = "export";
+      quote.shipment.serviceLevel = "airport-airport";
+      quote.shipment.incoterm = "EXW";
+
+      quote.stops = [
+        {
+          id: "S1",
+          type: "airport",
+          role: "origin",
+          sequence: 1,
+          location: {
+            code: "MIA",
+            name: "Miami International Airport",
+            city: "Miami",
+            state: "FL",
+            zip: "",
+            country: "USA"
+          }
+        },
+        {
+          id: "S2",
+          type: "airport",
+          role: "destination",
+          sequence: 2,
+          location: {
+            code: "GYE",
+            name: "Guayaquil Airport",
+            city: "Guayaquil",
+            state: "",
+            zip: "",
+            country: "Ecuador"
+          }
+        }
+      ];
+
+      quote.cargo.push({
+        id: "C1",
+        description: "General cargo",
+        commodity: "Parts",
+        hsCode: "",
+        cargoType: "general",
+        packaging: "pallet",
+        quantity: 2,
+        weight: { value: 100, unit: "kg" },
+        dimensions: { length: 120, width: 100, height: 150, unit: "cm" },
+        stackable: true,
+        hazardousDetails: {
+          unNumber: "",
+          class: "",
+          packingGroup: ""
+        },
+        temperature: null,
+        value: 0,
+        volume: { cbm: 0, cft: 0 }
+      });
+
+      quote.charges = [
+        {
+          id: "CH1",
+          name: "Air Freight",
+          type: "per_kg",
+          rate: 0.75,
+          quantity: 0,
+          minimum: 65,
+          amount: 0,
+          autoQuantity: true
+        },
+        {
+          id: "CH2",
+          name: "AWB",
+          type: "flat",
+          rate: 50,
+          quantity: 1,
+          minimum: 0,
+          amount: 0,
+          autoQuantity: false
+        }
+      ];
+
+      quote = calculateQuote(quote);
+
+      document.getElementById("output").textContent =
+        JSON.stringify(quote, null, 2);
+    };
+  </script>
+</body>
+</html>
